@@ -178,6 +178,15 @@
   .quiz-opt:hover{border-color:var(--orange);}
 
   .footer-note{padding:16px 40px;font-size:12px;color:#999;text-align:center;}
+
+  /* ===== DEMO MODE ===== */
+  #demoCursor{position:fixed;width:26px;height:26px;pointer-events:none;z-index:9999;display:none;transition:left .7s cubic-bezier(.4,0,.2,1), top .7s cubic-bezier(.4,0,.2,1);}
+  #demoCursor svg{filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));}
+  #demoCursor.click:before{content:"";position:absolute;left:-14px;top:-14px;width:40px;height:40px;border-radius:50%;background:rgba(232,98,44,.45);animation:ripple .5s ease-out;}
+  @keyframes ripple{from{transform:scale(.3);opacity:1;}to{transform:scale(1.6);opacity:0;}}
+  #demoCaption{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:rgba(11,37,69,.94);color:#fff;padding:14px 26px;border-radius:12px;font-size:15px;font-weight:600;max-width:640px;text-align:center;z-index:9999;display:none;box-shadow:0 12px 30px rgba(0,0,0,.35);}
+  #demoBadge{position:fixed;left:50%;top:60px;transform:translateX(-50%);background:var(--orange);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.05em;z-index:9999;display:none;}
+  #demoBtn{background:#fff;color:var(--navy);}
 </style>
 </head>
 <body>
@@ -193,6 +202,7 @@
     <button class="tab" data-s="promoadmin">Gestion promo</button>
     <button class="tab" data-s="candidat">Espace candidat</button>
   </div>
+  <button class="btn" id="demoBtn" style="margin-left:auto;white-space:nowrap;" onclick="startDemo()">▶ Démo automatique</button>
 </div>
 
 <!-- ============ VITRINE ============ -->
@@ -479,6 +489,10 @@
   </div>
 </div>
 
+<div id="demoBadge"></div>
+<div id="demoCursor"><svg width="26" height="26" viewBox="0 0 26 26"><path d="M3 2 L3 20 L8 16 L11 23 L14 21.5 L11 14.5 L18 14.5 Z" fill="#fff" stroke="#0B2545" stroke-width="1.5"/></svg></div>
+<div id="demoCaption"></div>
+
 <script>
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -501,6 +515,96 @@ function quizAnswer(btn, correct){
   btn.style.background = correct ? '#E1F3E8' : '#FBE3E1';
   btn.style.borderColor = correct ? '#2F9E5B' : '#D6473C';
   setTimeout(()=>{ alert(correct ? 'Bonne réponse ✔' : 'Pas tout à fait — la bonne réponse était "Un danger à anticiper".'); },250);
+}
+
+// ===== DEMO MODE ENGINE =====
+const cursor=document.getElementById('demoCursor');
+const caption=document.getElementById('demoCaption');
+const badge=document.getElementById('demoBadge');
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function say(text,ms=2600){caption.textContent=text;caption.style.display='block';return sleep(ms);}
+async function moveTo(el){
+  const r=el.getBoundingClientRect();
+  cursor.style.display='block';
+  cursor.style.left=(r.left+r.width/2-8)+'px';
+  cursor.style.top=(r.top+r.height/2-8)+'px';
+  await sleep(750);
+}
+async function clickOn(el, doClick=true){
+  await moveTo(el);
+  cursor.classList.add('click');
+  await sleep(180);
+  cursor.classList.remove('click');
+  if(doClick) el.click();
+  await sleep(500);
+}
+async function scrollToEl(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); await sleep(650); }
+
+async function startDemo(){
+  badge.style.display='block';
+  await say("Bienvenue sur la plateforme OSIRIS Auto-Moto École — voici un tour rapide de toutes les fonctionnalités.", 3200);
+
+  showScreen('vitrine');
+  await say("La page vitrine : les visiteurs découvrent l'école, les formations et les tarifs.", 2800);
+  const promoOv=document.getElementById('promoOverlay');
+  if(promoOv) promoOv.style.display='flex';
+  await say("Une promotion en cours ? Le site l'affiche automatiquement en pop-up aux visiteurs, avec compte à rebours.", 3200);
+  const closeBtn=document.querySelector('#promoOverlay .close');
+  await clickOn(closeBtn);
+
+  const formSec=document.getElementById('formations-sec');
+  await scrollToEl(formSec);
+  await say("Toutes les catégories de permis sont présentées : A, B, C, D, E.", 2600);
+
+  const tarifSec=document.getElementById('tarifs-sec');
+  await scrollToEl(tarifSec);
+  await say("Les tarifs et les tranches de paiement sont clairs pour chaque formation.", 2600);
+
+  const inscForm=document.getElementById('inscription-form');
+  await scrollToEl(inscForm);
+  await say("Un candidat peut demander son inscription directement en ligne, en 2 minutes.", 2800);
+
+  window.scrollTo({top:0,behavior:'smooth'}); await sleep(500);
+  await say("Passons maintenant côté personnel : la connexion.", 2200);
+  showScreen('login');
+  const secBtn=document.getElementById('role-sec');
+  await clickOn(secBtn);
+  await say("Le responsable et la secrétaire ont chacun leurs propres identifiants et leurs propres droits.", 2800);
+  const loginBtn=document.querySelector('#login .btn-orange');
+  await clickOn(loginBtn);
+
+  await say("Voici le tableau de bord : vue d'ensemble des inscrits, des encaissements et de la progression.", 3000);
+  const chip=document.querySelectorAll('#dashboard .chip')[2];
+  await clickOn(chip, false);
+  chip.classList.add('active');
+  document.querySelectorAll('#dashboard .chip').forEach(c=>{if(c!==chip)c.classList.remove('active');});
+  await say("On peut filtrer les candidats par statut : code, créneau, conduite en ville, terminé.", 2800);
+
+  const row=document.querySelector('#dashboard tbody tr, #dashboard tr[onclick]');
+  const firstRow=document.querySelectorAll('#dashboard tr')[1];
+  await clickOn(firstRow);
+  await say("En cliquant sur un candidat, on accède à toute sa fiche : infos, progression, paiements.", 3000);
+
+  const genBtn=document.querySelector('#fiche .btn-orange');
+  await clickOn(genBtn);
+  await say("Le reçu est généré automatiquement : montant, solde restant, tout est calculé et enregistré.", 3000);
+  const printBtn=document.querySelector('#recu .btn-orange');
+  await moveTo(printBtn);
+  await say("Il est prêt à être imprimé en A4 ou demi-A4, avec le logo de l'école.", 2600);
+
+  showScreen('promoadmin');
+  await say("Le responsable gère lui-même les promotions, sans toucher au code.", 2600);
+  const sw=document.querySelector('.switch');
+  await clickOn(sw, false);
+
+  showScreen('candidat');
+  await say("Et chaque candidat a son propre espace pour suivre sa progression et réviser le code.", 2800);
+  const opt=document.querySelectorAll('.quiz-opt')[1];
+  await clickOn(opt, false);
+  opt.style.background='#E1F3E8'; opt.style.borderColor='#2F9E5B';
+  await say("Fin de la démo — merci de votre attention !", 2800);
+
+  cursor.style.display='none'; caption.style.display='none'; badge.style.display='none';
 }
 
 // countdown to 30 juillet 2026
