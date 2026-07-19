@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>OSIRIS — Maquette plateforme</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+  :root{
+    --navy:#0B2545;
+    --navy-2:#123061;
+    --orange:#E8622C;
+    --orange-dark:#C84E1F;
+    --sand:#F6F1E9;
+    --sand-2:#EFE7D8;
+    --green:#2F9E5B;
+    --red:#D6473C;
+    --ink:#1A1D23;
+    --line:#DFD5C1;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--sand);color:var(--ink);font-family:'Work Sans',sans-serif;}
+  h1,h2,h3,.disp{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ===== App chrome ===== */
+  .appchrome{background:var(--navy);color:#fff;padding:10px 18px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;}
+  .appchrome .brand{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed';font-weight:800;font-size:18px;}
+  .appchrome .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--orange);}
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-left:10px;}
+  .tab{background:transparent;border:none;color:#C9D4E6;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Work Sans';font-weight:600;transition:.15s;}
+  .tab:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .tab.active{background:var(--orange);color:#fff;}
+  .screen{display:none;animation:fadein .25s ease;}
+  .screen.active{display:block;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  /* road divider */
+  .road-divider{height:6px;background:repeating-linear-gradient(90deg,var(--navy) 0 24px, transparent 24px 44px);opacity:.25;margin:0;}
+
+  /* ===== VITRINE ===== */
+  .hero{background:linear-gradient(160deg,var(--navy) 0%, var(--navy-2) 55%, #1a3d73 100%);color:#fff;padding:56px 40px 70px;position:relative;overflow:hidden;}
+  .hero:after{content:"";position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(232,98,44,.35),transparent 70%);}
+  .badge-row{display:flex;gap:10px;align-items:center;margin-bottom:18px;}
+  .plate{border:3px solid var(--orange);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed';font-weight:800;font-size:14px;letter-spacing:.08em;}
+  .hero h1{font-size:56px;line-height:.95;margin:0 0 14px;color:#fff;}
+  .hero h1 span{color:var(--orange);}
+  .hero p.lead{font-size:17px;max-width:520px;color:#D9E1EE;margin:0 0 26px;}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn{border:none;border-radius:9px;padding:13px 22px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Work Sans';}
+  .btn-orange{background:var(--orange);color:#fff;}
+  .btn-orange:hover{background:var(--orange-dark);}
+  .btn-outline{background:transparent;border:2px solid #fff;color:#fff;}
+  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;}
+
+  .signposts{position:absolute;right:40px;top:40px;display:flex;flex-direction:column;gap:10px;}
+  .sign{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-weight:800;font-size:13px;box-shadow:0 6px 16px rgba(0,0,0,.25);}
+  .sign.stop{background:var(--red);color:#fff;border-radius:8px;}
+  .sign.speed{background:#fff;color:var(--ink);border:3px solid var(--red);}
+
+  .section{padding:48px 40px;}
+  .section h2{font-size:32px;margin:0 0 6px;}
+  .eyebrow{color:var(--orange);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:12px;margin-bottom:6px;}
+
+  .formations-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:24px;}
+  .permis-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;}
+  .permis-badge{width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-weight:800;font-size:20px;margin:0 auto 10px;}
+  .permis-card h3{margin:0 0 4px;font-size:20px;}
+  .permis-card p{font-size:12.5px;color:#666;margin:0;}
+
+  .tarifs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:24px;}
+  .tarif-card{background:#fff;border-radius:16px;border:1px solid var(--line);padding:24px;position:relative;}
+  .tarif-card.highlight{border:2px solid var(--orange);box-shadow:0 10px 30px rgba(232,98,44,.15);}
+  .tarif-card .tag{position:absolute;top:-12px;right:20px;background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
+  .price-old{color:#a0a0a0;text-decoration:line-through;font-size:15px;}
+  .price-new{font-family:'Barlow Condensed';font-weight:800;font-size:36px;color:var(--navy);}
+  .tranches{margin-top:14px;font-size:13px;}
+  .tranches div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);}
+
+  .loc-block{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;align-items:center;}
+  .map-fake{background:#DCE6F0;border-radius:16px;height:220px;position:relative;overflow:hidden;border:1px solid var(--line);}
+  .map-fake:before{content:"";position:absolute;inset:0;background:
+    linear-gradient(0deg,transparent 24%, rgba(255,255,255,.5) 25%, rgba(255,255,255,.5) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.5) 75%, rgba(255,255,255,.5) 76%, transparent 77%),
+    linear-gradient(90deg,transparent 24%, rgba(255,255,255,.5) 25%, rgba(255,255,255,.5) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.5) 75%, rgba(255,255,255,.5) 76%, transparent 77%);
+    background-size:60px 60px;}
+  .pin{position:absolute;left:52%;top:46%;width:26px;height:26px;background:var(--red);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .contact-list div{display:flex;gap:10px;margin-bottom:10px;font-size:14px;}
+  .contact-list b{font-family:'Barlow Condensed';}
+
+  /* Promo popup */
+  .overlay{position:fixed;inset:0;background:rgba(11,37,69,.6);display:flex;align-items:center;justify-content:center;z-index:100;}
+  .promo-modal{background:#fff;border-radius:18px;max-width:420px;width:90%;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.35);}
+  .promo-top{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;padding:20px 22px;position:relative;}
+  .promo-top .close{position:absolute;right:14px;top:14px;background:rgba(255,255,255,.25);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-weight:700;}
+  .promo-top .eyebrow2{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.9;}
+  .promo-top h2{margin:4px 0 0;font-size:28px;color:#fff;}
+  .promo-body{padding:20px 22px;}
+  .countdown{display:flex;gap:8px;margin:12px 0 16px;}
+  .countdown div{background:var(--sand-2);border-radius:8px;padding:8px 10px;text-align:center;flex:1;}
+  .countdown b{display:block;font-family:'Barlow Condensed';font-size:20px;}
+  .countdown span{font-size:10px;color:#777;}
+
+  /* Login */
+  .login-wrap{min-height:70vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--navy),var(--navy-2));padding:40px;}
+  .login-card{background:#fff;border-radius:18px;padding:32px;width:380px;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+  .role-toggle{display:flex;background:var(--sand-2);border-radius:10px;padding:4px;margin-bottom:20px;}
+  .role-toggle button{flex:1;border:none;background:transparent;padding:9px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
+  .role-toggle button.active{background:var(--navy);color:#fff;}
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:5px;}
+  .field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:'Work Sans';}
+  .btn-block{width:100%;}
+
+  /* Dashboard */
+  .dash-shell{display:grid;grid-template-columns:220px 1fr;min-height:80vh;}
+  .sidebar{background:var(--navy);color:#fff;padding:22px 14px;}
+  .sidebar .who{font-size:12px;color:#9fb0c9;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.12);}
+  .side-link{display:block;padding:10px 12px;border-radius:8px;color:#C9D4E6;font-size:13.5px;font-weight:600;margin-bottom:4px;cursor:pointer;}
+  .side-link.active,.side-link:hover{background:rgba(255,255,255,.1);color:#fff;}
+  .dash-main{padding:26px 30px;background:var(--sand);}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+  .stat-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .stat-card .n{font-family:'Barlow Condensed';font-weight:800;font-size:30px;}
+  .stat-card .l{font-size:12px;color:#777;}
+  .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:13.5px;}
+  th{background:var(--sand-2);text-align:left;padding:10px 12px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:#666;}
+  td{padding:11px 12px;border-top:1px solid var(--line);}
+  tr:hover td{background:#FBF8F2;cursor:pointer;}
+  .status-pill{padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .st-code{background:#FDE8DA;color:var(--orange-dark);}
+  .st-creneau{background:#E6EEFB;color:#2456A6;}
+  .st-conduite{background:#EDE3FB;color:#6B3FBF;}
+  .st-fini{background:#E1F3E8;color:var(--green);}
+  .bar{background:var(--sand-2);border-radius:6px;height:7px;width:80px;overflow:hidden;}
+  .bar span{display:block;height:100%;background:var(--green);}
+
+  /* fiche candidat */
+  .fiche-grid{display:grid;grid-template-columns:280px 1fr;gap:22px;}
+  .fiche-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
+  .avatar{width:64px;height:64px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-weight:800;font-size:24px;margin-bottom:10px;}
+  .kv{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid var(--sand-2);}
+  .stepper{display:flex;margin:18px 0;}
+  .step{flex:1;text-align:center;position:relative;}
+  .step .circle{width:34px;height:34px;border-radius:50%;background:var(--sand-2);color:#999;display:flex;align-items:center;justify-content:center;font-weight:800;margin:0 auto 6px;font-family:'Barlow Condensed';}
+  .step.done .circle{background:var(--green);color:#fff;}
+  .step.now .circle{background:var(--orange);color:#fff;}
+  .step:after{content:"";position:absolute;top:17px;left:50%;width:100%;height:2px;background:var(--sand-2);z-index:-1;}
+  .step:last-child:after{display:none;}
+  .step.done:after{background:var(--green);}
+  .step p{font-size:11px;color:#777;margin:0;}
+
+  /* receipt */
+  .receipt-wrap{display:flex;justify-content:center;padding:30px;background:#e9e4d8;}
+  .receipt{width:420px;background:#fff;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.2);padding:26px;}
+  .receipt-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--orange);padding-bottom:14px;margin-bottom:14px;}
+  .receipt-logo{width:46px;height:46px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Barlow Condensed';}
+  .receipt h3{margin:0;font-size:18px;}
+  .receipt small{color:#888;}
+  .receipt-num{background:var(--sand-2);border-radius:8px;padding:8px 12px;text-align:center;margin-bottom:14px;font-size:13px;}
+  .receipt table{font-size:12.5px;}
+  .receipt td{padding:6px 4px;}
+  .total-row{background:var(--navy);color:#fff;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;margin-top:10px;font-family:'Barlow Condensed';font-weight:700;font-size:16px;}
+  .receipt-foot{margin-top:16px;text-align:center;font-size:11px;color:#999;}
+
+  /* admin promo */
+  .promo-admin-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;max-width:560px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .switch{width:46px;height:26px;border-radius:20px;background:var(--green);position:relative;cursor:pointer;}
+  .switch:before{content:"";position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;right:3px;}
+
+  /* quiz */
+  .quiz-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;max-width:520px;}
+  .quiz-opt{display:block;width:100%;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:10px;cursor:pointer;font-size:14px;}
+  .quiz-opt:hover{border-color:var(--orange);}
+
+  .footer-note{padding:16px 40px;font-size:12px;color:#999;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="appchrome">
+  <div class="brand"><span class="dot"></span> OSIRIS <span style="color:#9fb0c9;font-weight:500;">— maquette plateforme</span></div>
+  <div class="tabs">
+    <button class="tab active" data-s="vitrine">Vitrine</button>
+    <button class="tab" data-s="login">Connexion</button>
+    <button class="tab" data-s="dashboard">Dashboard staff</button>
+    <button class="tab" data-s="fiche">Fiche candidat</button>
+    <button class="tab" data-s="recu">Reçu</button>
+    <button class="tab" data-s="promoadmin">Gestion promo</button>
+    <button class="tab" data-s="candidat">Espace candidat</button>
+  </div>
+</div>
+
+<!-- ============ VITRINE ============ -->
+<div class="screen active" id="vitrine">
+  <div class="hero">
+    <div class="signposts">
+      <div class="sign stop">STOP</div>
+      <div class="sign speed">50</div>
+    </div>
+    <div class="badge-row"><div class="plate">OSIRIS · AUTO-MOTO ÉCOLE</div></div>
+    <h1>Obtiens ton<br><span>permis</span>, sereinement.</h1>
+    <p class="lead">Code, créneau, conduite en ville, moto et poids lourd — formation complète à Bobo-Dioulasso, encadrée du premier cours à l'examen.</p>
+    <div class="cta-row">
+      <button class="btn btn-orange" onclick="showScreen('inscription-form')">S'inscrire en ligne</button>
+      <button class="btn btn-outline" onclick="document.getElementById('tarifs-sec').scrollIntoView({behavior:'smooth'})">Voir les tarifs</button>
+    </div>
+  </div>
+
+  <div class="road-divider"></div>
+
+  <div class="section" id="formations-sec">
+    <div class="eyebrow">Nos formations</div>
+    <h2>Toutes les catégories de permis</h2>
+    <div class="formations-grid">
+      <div class="permis-card"><div class="permis-badge">A</div><h3>Moto</h3><p>Permis A — deux-roues</p></div>
+      <div class="permis-card"><div class="permis-badge">B</div><h3>Voiture</h3><p>Permis B — véhicule léger</p></div>
+      <div class="permis-card"><div class="permis-badge">C</div><h3>Poids lourd</h3><p>Permis C — camions</p></div>
+      <div class="permis-card"><div class="permis-badge">D</div><h3>Transport en commun</h3><p>Permis D — bus / minibus</p></div>
+      <div class="permis-card"><div class="permis-badge">E</div><h3>Remorque</h3><p>Permis E — attelage lourd</p></div>
+    </div>
+  </div>
+
+  <div class="section" id="tarifs-sec" style="background:#fff;">
+    <div class="eyebrow">Tarifs</div>
+    <h2>Des formules claires, sans surprise</h2>
+    <div class="tarifs-grid">
+      <div class="tarif-card">
+        <h3>Permis B — Voiture</h3>
+        <div class="price-new">75 000f</div>
+        <div class="tranches">
+          <div><span>1er versement</span><b>25 000f</b></div>
+          <div><span>2e versement</span><b>25 000f</b></div>
+          <div><span>3e versement</span><b>25 000f</b></div>
+        </div>
+      </div>
+      <div class="tarif-card highlight">
+        <div class="tag">Promo en cours</div>
+        <h3>Permis C — Poids lourd</h3>
+        <div class="price-old">125 000f</div>
+        <div class="price-new">99 500f</div>
+        <div class="tranches">
+          <div><span>1er versement</span><b>30 000f</b></div>
+          <div><span>2e versement</span><b>35 000f</b></div>
+          <div><span>3e versement</span><b>34 500f</b></div>
+        </div>
+      </div>
+      <div class="tarif-card">
+        <h3>Permis A — Moto</h3>
+        <div class="price-new">40 000f</div>
+        <div class="tranches">
+          <div><span>1er versement</span><b>20 000f</b></div>
+          <div><span>2e versement</span><b>20 000f</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">Où nous trouver</div>
+    <h2>Bobo-Dioulasso, Sakabi — Kôkô, Secteur 24</h2>
+    <div class="loc-block">
+      <div class="map-fake"><div class="pin"></div></div>
+      <div class="contact-list">
+        <div>📍 <b>Adresse :</b> Sakabi — Kôkô, Secteur 24, Bobo-Dioulasso</div>
+        <div>📞 <b>Contacts :</b> 65 56 05 05 / 70 51 79 53 / 76 79 11 44</div>
+        <div>💬 <b>WhatsApp :</b> 65 56 05 05</div>
+        <div>🕐 <b>Ouvert :</b> Lun–Sam, 7h30–18h00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="background:#fff;">
+    <div class="eyebrow">Inscription en ligne</div>
+    <h2 style="margin-bottom:20px;">Réserve ta place en 2 minutes</h2>
+    <div id="inscription-form" style="max-width:520px;">
+      <div class="field"><label>Nom complet</label><input placeholder="Ex : KABORE Aminata"></div>
+      <div class="field"><label>Téléphone</label><input placeholder="Ex : 70 00 00 00"></div>
+      <div class="field"><label>Catégorie de permis souhaitée</label>
+        <select><option>A — Moto</option><option>B — Voiture</option><option>C — Poids lourd</option><option>D — Transport en commun</option><option>E — Remorque</option></select>
+      </div>
+      <div class="field"><label>Message (optionnel)</label><input placeholder="Une précision à ajouter ?"></div>
+      <button class="btn btn-orange btn-block" onclick="alert('Demande envoyée ✔ — la structure sera notifiée et vous contactera pour finaliser l’inscription.')">Envoyer ma demande d'inscription</button>
+    </div>
+  </div>
+
+  <div class="footer-note">OSIRIS Auto-Moto École — votre satisfaction, notre fierté.</div>
+</div>
+
+<!-- Promo popup -->
+<div class="overlay" id="promoOverlay">
+  <div class="promo-modal">
+    <div class="promo-top">
+      <button class="close" onclick="document.getElementById('promoOverlay').style.display='none'">✕</button>
+      <div class="eyebrow2">Grande promo — spéciale vacances</div>
+      <h2>Permis C dès 99 500f</h2>
+    </div>
+    <div class="promo-body">
+      <p style="margin:0 0 6px;font-size:14px;color:#555;">Obtiens ton permis poids lourd en 45 jours. Paiement possible en 3 tranches. Frais de dossier gratuits.</p>
+      <div class="countdown">
+        <div><b id="cd-d">--</b><span>jours</span></div>
+        <div><b id="cd-h">--</b><span>heures</span></div>
+        <div><b id="cd-m">--</b><span>min</span></div>
+      </div>
+      <button class="btn btn-orange btn-block" onclick="document.getElementById('promoOverlay').style.display='none';document.getElementById('tarifs-sec').scrollIntoView({behavior:'smooth'})">Voir l'offre</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<div class="screen" id="login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <h2 style="margin:0 0 4px;">Connexion</h2>
+      <p style="font-size:13px;color:#777;margin:0 0 18px;">Accès réservé au personnel OSIRIS</p>
+      <div class="role-toggle">
+        <button class="active" id="role-resp" onclick="setRole('resp')">Responsable</button>
+        <button id="role-sec" onclick="setRole('sec')">Secrétaire</button>
+      </div>
+      <div class="field"><label>Identifiant</label><input placeholder="ex : responsable@osiris"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" placeholder="••••••••"></div>
+      <button class="btn btn-orange btn-block" onclick="showScreen('dashboard')">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="screen" id="dashboard">
+  <div class="dash-shell">
+    <div class="sidebar">
+      <div class="who">Connecté en tant que<br><b id="who-label" style="color:#fff;">Responsable</b></div>
+      <div class="side-link active">📊 Tableau de bord</div>
+      <div class="side-link" onclick="showScreen('fiche')">👤 Candidats</div>
+      <div class="side-link">💳 Paiements & reçus</div>
+      <div class="side-link" onclick="showScreen('promoadmin')">🏷️ Promotions</div>
+      <div class="side-link">⚙️ Paramètres</div>
+    </div>
+    <div class="dash-main">
+      <h2 style="margin-top:0;">Tableau de bord</h2>
+      <div class="stat-row">
+        <div class="stat-card"><div class="n">128</div><div class="l">Candidats inscrits</div></div>
+        <div class="stat-card"><div class="n">6 240 000f</div><div class="l">Encaissé ce mois</div></div>
+        <div class="stat-card"><div class="n">1 180 000f</div><div class="l">Restant à encaisser</div></div>
+        <div class="stat-card"><div class="n">21</div><div class="l">Formés ce mois</div></div>
+      </div>
+      <div class="filters">
+        <div class="chip active">Tous (128)</div>
+        <div class="chip">Code (34)</div>
+        <div class="chip">Créneau (28)</div>
+        <div class="chip">Conduite en ville (19)</div>
+        <div class="chip">Terminé (47)</div>
+        <div class="chip">Payé intégralement (61)</div>
+      </div>
+      <table>
+        <tr><th>Candidat</th><th>Permis</th><th>Statut</th><th>Solde restant</th><th>Progression paiement</th></tr>
+        <tr onclick="showScreen('fiche')"><td>KABORE Aminata</td><td>B</td><td><span class="status-pill st-creneau">Créneau</span></td><td>25 000f</td><td><div class="bar"><span style="width:66%"></span></div></td></tr>
+        <tr onclick="showScreen('fiche')"><td>OUEDRAOGO Issa</td><td>C</td><td><span class="status-pill st-code">Code</span></td><td>69 500f</td><td><div class="bar"><span style="width:30%"></span></div></td></tr>
+        <tr onclick="showScreen('fiche')"><td>SANOU Fatimata</td><td>A</td><td><span class="status-pill st-fini">Terminé</span></td><td>0f</td><td><div class="bar"><span style="width:100%"></span></div></td></tr>
+        <tr onclick="showScreen('fiche')"><td>TRAORE Boubacar</td><td>B</td><td><span class="status-pill st-conduite">Conduite en ville</span></td><td>15 000f</td><td><div class="bar"><span style="width:80%"></span></div></td></tr>
+        <tr onclick="showScreen('fiche')"><td>ZONGO Awa</td><td>D</td><td><span class="status-pill st-code">Code</span></td><td>50 000f</td><td><div class="bar"><span style="width:40%"></span></div></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FICHE CANDIDAT ============ -->
+<div class="screen" id="fiche">
+  <div class="dash-main" style="padding:28px 34px;">
+    <button class="tab" style="background:#eee;color:#333;margin-bottom:16px;" onclick="showScreen('dashboard')">← Retour au tableau de bord</button>
+    <div class="fiche-grid">
+      <div class="fiche-card">
+        <div class="avatar">KA</div>
+        <h3 style="margin:0 0 2px;">KABORE Aminata</h3>
+        <p style="color:#777;font-size:13px;margin:0 0 14px;">Candidate — Permis B</p>
+        <div class="kv"><span>Téléphone</span><b>70 12 34 56</b></div>
+        <div class="kv"><span>Contact urgence</span><b>76 98 76 54</b></div>
+        <div class="kv"><span>Date d'inscription</span><b>03/06/2026</b></div>
+        <div class="kv"><span>Moniteur code</span><b>M. Sawadogo</b></div>
+        <div class="kv"><span>Moniteur créneau</span><b>M. Kaboré</b></div>
+        <div class="kv"><span>Moniteur conduite</span><b>M. Diallo</b></div>
+        <button class="btn btn-orange btn-block" style="margin-top:16px;" onclick="showScreen('recu')">Générer un reçu</button>
+      </div>
+      <div>
+        <div class="fiche-card" style="margin-bottom:18px;">
+          <h3 style="margin-top:0;">Progression de la formation</h3>
+          <div class="stepper">
+            <div class="step done"><div class="circle">✓</div><p>Code</p></div>
+            <div class="step now"><div class="circle">2</div><p>Créneau</p></div>
+            <div class="step"><div class="circle">3</div><p>Conduite ville</p></div>
+            <div class="step"><div class="circle">4</div><p>Terminé</p></div>
+          </div>
+        </div>
+        <div class="fiche-card">
+          <h3 style="margin-top:0;">Historique des paiements</h3>
+          <table>
+            <tr><th>Date</th><th>Montant</th><th>Reçu N°</th><th>Solde après</th></tr>
+            <tr><td>03/06/2026</td><td>25 000f</td><td class="mono">OSR-0231</td><td>50 000f</td></tr>
+            <tr><td>18/06/2026</td><td>25 000f</td><td class="mono">OSR-0255</td><td>25 000f</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REÇU ============ -->
+<div class="screen" id="recu">
+  <div class="receipt-wrap">
+    <div class="receipt">
+      <div class="receipt-head">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div class="receipt-logo">OS</div>
+          <div><h3>OSIRIS Auto-Moto École</h3><small>Sakabi–Kôkô, Secteur 24, Bobo-Dioulasso<br>Tél : 65 56 05 05 / 70 51 79 53</small></div>
+        </div>
+      </div>
+      <div class="receipt-num mono">REÇU N° OSR-0256 &nbsp;·&nbsp; 19/07/2026</div>
+      <table style="width:100%;">
+        <tr><td><b>Candidat</b></td><td style="text-align:right;">KABORE Aminata</td></tr>
+        <tr><td><b>Formation</b></td><td style="text-align:right;">Permis B — Voiture</td></tr>
+        <tr><td><b>Montant total formation</b></td><td style="text-align:right;">75 000f</td></tr>
+        <tr><td><b>Déjà versé (avant ce jour)</b></td><td style="text-align:right;">25 000f</td></tr>
+        <tr><td><b>Versement de ce jour</b></td><td style="text-align:right;">25 000f</td></tr>
+      </table>
+      <div class="total-row"><span>Solde restant</span><span>25 000f</span></div>
+      <div class="receipt-foot">Reçu généré automatiquement et enregistré dans le dossier du candidat.<br>Merci de votre confiance — OSIRIS, votre satisfaction, notre fierté.</div>
+      <button class="btn btn-orange btn-block" style="margin-top:16px;" onclick="window.print()">🖨️ Imprimer (A4 / demi-A4)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROMO ADMIN ============ -->
+<div class="screen" id="promoadmin">
+  <div class="dash-main">
+    <h2 style="margin-top:0;">Gestion des promotions</h2>
+    <p style="color:#777;font-size:13.5px;max-width:520px;">Active ou modifie l'annonce affichée aux visiteurs du site vitrine — sans intervention technique.</p>
+    <div class="promo-admin-card">
+      <div class="toggle-row">
+        <div><b>Promo actuellement</b><div style="font-size:12.5px;color:#2F9E5B;font-weight:700;">● Active</div></div>
+        <div class="switch"></div>
+      </div>
+      <div class="field"><label>Titre de la promo</label><input value="Grande promo spéciale vacances"></div>
+      <div class="field"><label>Catégorie concernée</label><select><option>C — Poids lourd</option><option>B — Voiture</option><option>A — Moto</option></select></div>
+      <div style="display:flex;gap:12px;">
+        <div class="field" style="flex:1;"><label>Ancien prix</label><input value="125 000f"></div>
+        <div class="field" style="flex:1;"><label>Nouveau prix</label><input value="99 500f"></div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="field" style="flex:1;"><label>1er versement</label><input value="30 000f"></div>
+        <div class="field" style="flex:1;"><label>2e versement</label><input value="35 000f"></div>
+        <div class="field" style="flex:1;"><label>3e versement</label><input value="34 500f"></div>
+      </div>
+      <div class="field"><label>Valable jusqu'au</label><input value="30/07/2026"></div>
+      <button class="btn btn-orange btn-block">Enregistrer et publier sur le site</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ESPACE CANDIDAT ============ -->
+<div class="screen" id="candidat">
+  <div class="dash-main">
+    <h2 style="margin-top:0;">Bonjour Aminata 👋</h2>
+    <div class="stat-row">
+      <div class="stat-card"><div class="n">2/4</div><div class="l">Étapes complétées</div></div>
+      <div class="stat-card"><div class="n">25 000f</div><div class="l">Solde restant</div></div>
+      <div class="stat-card"><div class="n">Créneau</div><div class="l">Étape actuelle</div></div>
+    </div>
+    <div class="quiz-card">
+      <div class="eyebrow">Révision code</div>
+      <h3 style="margin:4px 0 14px;">Question 1/10</h3>
+      <p style="font-size:14px;">Que signifie un panneau triangulaire à bordure rouge ?</p>
+      <button class="quiz-opt" onclick="quizAnswer(this,false)">Une obligation à respecter</button>
+      <button class="quiz-opt" onclick="quizAnswer(this,true)">Un danger à anticiper</button>
+      <button class="quiz-opt" onclick="quizAnswer(this,false)">Une interdiction</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const match=[...document.querySelectorAll('.tab')].find(t=>t.dataset.s===id);
+  if(match) match.classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showScreen(t.dataset.s)));
+
+function setRole(r){
+  document.getElementById('role-resp').classList.toggle('active', r==='resp');
+  document.getElementById('role-sec').classList.toggle('active', r==='sec');
+  document.getElementById('who-label').textContent = r==='resp' ? 'Responsable' : 'Secrétaire';
+}
+
+function quizAnswer(btn, correct){
+  document.querySelectorAll('.quiz-opt').forEach(b=>b.style.pointerEvents='none');
+  btn.style.background = correct ? '#E1F3E8' : '#FBE3E1';
+  btn.style.borderColor = correct ? '#2F9E5B' : '#D6473C';
+  setTimeout(()=>{ alert(correct ? 'Bonne réponse ✔' : 'Pas tout à fait — la bonne réponse était "Un danger à anticiper".'); },250);
+}
+
+// countdown to 30 juillet 2026
+const target=new Date('2026-07-30T23:59:59');
+function tick(){
+  const now=new Date();
+  let diff=Math.max(0,target-now);
+  const d=Math.floor(diff/86400000); diff-=d*86400000;
+  const h=Math.floor(diff/3600000); diff-=h*3600000;
+  const m=Math.floor(diff/60000);
+  document.getElementById('cd-d').textContent=d;
+  document.getElementById('cd-h').textContent=h;
+  document.getElementById('cd-m').textContent=m;
+}
+tick(); setInterval(tick,60000);
+</script>
+
+</body>
+</html>
